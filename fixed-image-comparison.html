@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scroll-Triggered Image Comparison Slider</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+        
+        .content {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        h1, h2 {
+            text-align: center;
+        }
+        
+        /* Spacer to allow scrolling */
+        .scroll-spacer {
+            height: 80vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            color: #666;
+            text-align: center;
+            padding: 0 20px;
+        }
+        
+        /* Sticky container that stays in view while scrolling */
+        .sticky-container {
+            position: sticky;
+            top: 0;
+            height: 100vh;
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: #f5f5f5;
+            z-index: 1;
+        }
+        
+        .comparison-container {
+            position: relative;
+            width: 90%;
+            max-width: 1000px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+        
+        .comparison-container img {
+            width: 100%;
+            display: block;
+        }
+        
+        .image-before {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 0%; /* Start at 0% width */
+            height: 100%;
+            overflow: hidden;
+            transition: width 0.05s ease; /* Smooth transition when changed programmatically */
+        }
+        
+        .image-after {
+            display: block;
+        }
+        
+        .slider-handle {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            left: 0%; /* Start at 0% */
+            width: 4px;
+            background: white;
+            transform: translateX(-2px);
+            transition: left 0.05s ease; /* Smooth transition when changed programmatically */
+        }
+        
+        .slider-handle::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 40px;
+            height: 40px;
+            background: white;
+            border-radius: 50%;
+            border: 2px solid #333;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
+        }
+        
+        .slider-handle::before {
+            content: '↔';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 20px;
+            color: #333;
+            z-index: 10;
+        }
+        
+        .image-label {
+            position: absolute;
+            background-color: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 5px 10px;
+            font-size: 14px;
+            pointer-events: none;
+        }
+        
+        .before-label {
+            top: 20px;
+            left: 20px;
+        }
+        
+        .after-label {
+            top: 20px;
+            right: 20px;
+        }
+        
+        .scroll-instruction {
+            position: absolute;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 20px;
+            font-size: 16px;
+            text-align: center;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { opacity: 0.7; }
+            50% { opacity: 1; }
+            100% { opacity: 0.7; }
+        }
+    </style>
+</head>
+<body>
+    <div class="scroll-spacer">
+        <p>↓ Scroll down to reveal the transformation ↓</p>
+    </div>
+    
+    <div class="sticky-container">
+        <div class="comparison-container" id="comparison-container">
+            <!-- Using the actual satellite images -->
+            <img src="2023_Kfushi.jpg" alt="Kulhudhuffushi 2023" class="image-after">
+            <div class="image-before">
+                <img src="2006_Kfushi.jpg" alt="Kulhudhuffushi 2006">
+            </div>
+            <div class="slider-handle" id="slider-handle"></div>
+            <div class="image-label before-label">BEFORE (2006)</div>
+            <div class="image-label after-label">AFTER (2023)</div>
+            <div class="scroll-instruction">Keep scrolling to see the change</div>
+        </div>
+    </div>
+    
+    <div class="content">
+        <h1>Scroll-Triggered Image Comparison</h1>
+        <p>This interactive slider reveals the "before" image as you scroll down the page, allowing you to see the transformation between two time periods. As you scroll further, more of the "before" image is revealed.</p>
+        
+        <h2>How It Works</h2>
+        <p>This effect uses:</p>
+        <ul>
+            <li>A sticky container that remains fixed on screen while scrolling</li>
+            <li>Scroll position detection to determine how much of each image to show</li>
+            <li>CSS transitions for smooth slider movement</li>
+        </ul>
+        
+        <h2>Implementation Details</h2>
+        <p>The slider uses the following techniques:</p>
+        <ol>
+            <li>The page has additional scrollable content to enable the scroll-based animation</li>
+            <li>JavaScript monitors the scroll position and calculates the appropriate slider position</li>
+            <li>CSS positioning is used to overlay the two images</li>
+            <li>The "before" image container width is adjusted based on scroll position</li>
+        </ol>
+        
+        <h2>Customizing</h2>
+        <p>To use this with your own satellite images:</p>
+        <ol>
+            <li>Replace the placeholder images with your own before/after satellite images</li>
+            <li>Update the dates in the labels</li>
+            <li>Adjust the scroll sensitivity and timing as needed</li>
+            <li>Integrate with the rest of your content</li>
+        </ol>
+        
+        <div style="height: 100vh; padding: 20px;">
+            <h2>Additional Content</h2>
+            <p>You can continue your article here, explaining the changes shown in the comparison. The slider will remain fixed at the top of the viewport until the user scrolls past this section.</p>
+            <p>The transition effect is most compelling when paired with explanatory text that details what the viewer is seeing.</p>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const container = document.getElementById('comparison-container');
+            const handle = document.getElementById('slider-handle');
+            const beforeImage = document.querySelector('.image-before');
+            const stickyContainer = document.querySelector('.sticky-container');
+            const afterImg = document.querySelector('.image-after');
+            const beforeImg = document.querySelector('.image-before img');
+            
+            // Check if images are loaded successfully
+            afterImg.addEventListener('error', function() {
+                console.error('Error loading after image');
+                console.error('Image failed to load'); // Just log the error without changing the source
+            });
+            
+            beforeImg.addEventListener('error', function() {
+                console.error('Error loading before image');
+                console.error('Image failed to load'); // Just log the error without changing the source
+            });
+            
+            // Manual interaction variables
+            let isDragging = false;
+            let isManuallyControlled = false;
+            let manualControlTimeout;
+            
+            // Set the slider to start position
+            updateSliderPosition(0);
+            
+            // First update after a slight delay to ensure everything is loaded
+            setTimeout(() => {
+                updateSliderPosition(0);
+                // Trigger a scroll event to initialize the slider position
+                window.dispatchEvent(new Event('scroll'));
+            }, 500);
+            
+            // Scroll event listener
+            window.addEventListener('scroll', function() {
+                // Skip scroll updates if user is manually controlling the slider
+                if (isManuallyControlled) return;
+                
+                // Calculate how far through the sticky section we've scrolled
+                const containerRect = stickyContainer.getBoundingClientRect();
+                const startY = 0;
+                const endY = window.innerHeight * 1.5; // Increased to make it 3x slower
+                const currentY = Math.max(0, startY - containerRect.top);
+                
+                // Calculate percentage scrolled within our trigger range
+                const scrollPercentage = Math.min(100, Math.max(0, (currentY / endY) * 100));
+                
+                // Update the slider position
+                updateSliderPosition(scrollPercentage);
+            });
+            
+            // Mouse events for manual control
+            handle.addEventListener('mousedown', startDrag);
+            document.addEventListener('mousemove', drag);
+            document.addEventListener('mouseup', endDrag);
+            
+            // Touch events for mobile
+            handle.addEventListener('touchstart', startDrag);
+            document.addEventListener('touchmove', drag);
+            document.addEventListener('touchend', endDrag);
+            
+            // Click on container for direct position change
+            container.addEventListener('click', function(e) {
+                if (e.target !== handle && !isDragging) {
+                    const containerRect = container.getBoundingClientRect();
+                    const percentage = ((e.clientX - containerRect.left) / containerRect.width) * 100;
+                    updateSliderPosition(percentage);
+                    
+                    // Set manual control
+                    setManualControl();
+                }
+            });
+            
+            function startDrag(e) {
+                e.preventDefault();
+                isDragging = true;
+                
+                // Set manual control
+                setManualControl();
+            }
+            
+            function drag(e) {
+                if (!isDragging) return;
+                
+                let clientX;
+                
+                // Handle both mouse and touch events
+                if (e.type === 'touchmove') {
+                    clientX = e.touches[0].clientX;
+                    e.preventDefault(); // Prevent scrolling when dragging
+                } else {
+                    clientX = e.clientX;
+                }
+                
+                const containerRect = container.getBoundingClientRect();
+                const percentage = ((clientX - containerRect.left) / containerRect.width) * 100;
+                updateSliderPosition(percentage);
+            }
+            
+            function endDrag() {
+                isDragging = false;
+            }
+            
+            function updateSliderPosition(percentage) {
+                // Constrain percentage between 0 and 100
+                const constrainedPercentage = Math.max(0, Math.min(percentage, 100));
+                
+                // Update positions
+                beforeImage.style.width = `${constrainedPercentage}%`;
+                handle.style.left = `${constrainedPercentage}%`;
+            }
+            
+            function setManualControl() {
+                isManuallyControlled = true;
+                
+                // Clear any existing timeout
+                if (manualControlTimeout) {
+                    clearTimeout(manualControlTimeout);
+                }
+                
+                // Set timeout to release manual control after a delay
+                manualControlTimeout = setTimeout(function() {
+                    isManuallyControlled = false;
+                }, 3000); // Return to scroll control after 3 seconds
+            }
+        });
+    </script>
+</body>
+</html>
