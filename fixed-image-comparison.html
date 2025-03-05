@@ -186,6 +186,29 @@
             border-radius: 5px;
             display: none;
         }
+
+        /* Placeholder images for demo */
+        .placeholder-before {
+            background-color: #8bc34a;
+            height: 400px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        .placeholder-after {
+            background-color: #03a9f4;
+            height: 400px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 24px;
+            font-weight: bold;
+        }
     </style>
 </head>
 <body>
@@ -195,9 +218,10 @@
     
     <div class="sticky-container">
         <div class="comparison-container" id="comparison-container">
-            <img src="./2023_Kfushi.jpg" alt="Kulhudhuffushi 2023" class="image-after">
+            <!-- Using placeholders in case images are not available -->
+            <div class="placeholder-after">2023 IMAGE</div>
             <div class="image-before">
-                <img src="./2006_Kfushi.jpg" alt="Kulhudhuffushi 2006">
+                <div class="placeholder-before">2006 IMAGE</div>
             </div>
             <div class="slider-handle" id="slider-handle"></div>
             <div class="image-label before-label">BEFORE (2006)</div>
@@ -239,166 +263,3 @@
             </ul>
             <p>These changes reflect both human activity and natural processes affecting the island ecosystem.</p>
         </div>
-    </div>
-
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const container = document.getElementById('comparison-container');
-            const handle = document.getElementById('slider-handle');
-            const beforeImage = document.querySelector('.image-before');
-            const stickyContainer = document.querySelector('.sticky-container');
-            const afterImg = document.querySelector('.image-after');
-            const beforeImg = document.querySelector('.image-before img');
-            const errorMessage = document.getElementById('error-message');
-            const loadingIndicator = document.getElementById('loading');
-            
-            // Show loading indicator
-            loadingIndicator.style.display = 'block';
-            
-            // Track loading state
-            let imagesLoaded = 0;
-            const totalImages = 2;
-            
-            function imageLoaded() {
-                imagesLoaded++;
-                if (imagesLoaded === totalImages) {
-                    // Both images loaded successfully
-                    loadingIndicator.style.display = 'none';
-                    // Initialize the slider
-                    initializeSlider();
-                }
-            }
-            
-            // Check if images are loaded successfully
-            afterImg.addEventListener('load', imageLoaded);
-            beforeImg.addEventListener('load', imageLoaded);
-            
-            afterImg.addEventListener('error', function() {
-                console.error('Error loading after image (2023)');
-                errorMessage.style.display = 'block';
-                loadingIndicator.style.display = 'none';
-                // Try with alternative path
-                this.src = '2023_Kfushi.jpg';
-            });
-            
-            beforeImg.addEventListener('error', function() {
-                console.error('Error loading before image (2006)');
-                errorMessage.style.display = 'block';
-                loadingIndicator.style.display = 'none';
-                // Try with alternative path
-                this.src = '2006_Kfushi.jpg';
-            });
-            
-            function initializeSlider() {
-                // Manual interaction variables
-                let isDragging = false;
-                let isManuallyControlled = false;
-                let manualControlTimeout;
-                
-                // Set the slider to start position
-                updateSliderPosition(0);
-                
-                // First update after a slight delay to ensure everything is loaded
-                setTimeout(() => {
-                    updateSliderPosition(0);
-                    // Trigger a scroll event to initialize the slider position
-                    window.dispatchEvent(new Event('scroll'));
-                }, 500);
-                
-                // Scroll event listener
-                window.addEventListener('scroll', function() {
-                    // Skip scroll updates if user is manually controlling the slider
-                    if (isManuallyControlled) return;
-                    
-                    // Calculate how far through the sticky section we've scrolled
-                    const containerRect = stickyContainer.getBoundingClientRect();
-                    const startY = 0;
-                    const endY = window.innerHeight * 1.5; // Increased to make it 3x slower
-                    const currentY = Math.max(0, startY - containerRect.top);
-                    
-                    // Calculate percentage scrolled within our trigger range
-                    const scrollPercentage = Math.min(100, Math.max(0, (currentY / endY) * 100));
-                    
-                    // Update the slider position
-                    updateSliderPosition(scrollPercentage);
-                });
-                
-                // Mouse events for manual control
-                handle.addEventListener('mousedown', startDrag);
-                document.addEventListener('mousemove', drag);
-                document.addEventListener('mouseup', endDrag);
-                
-                // Touch events for mobile
-                handle.addEventListener('touchstart', startDrag);
-                document.addEventListener('touchmove', drag);
-                document.addEventListener('touchend', endDrag);
-                
-                // Click on container for direct position change
-                container.addEventListener('click', function(e) {
-                    if (e.target !== handle && !isDragging) {
-                        const containerRect = container.getBoundingClientRect();
-                        const percentage = ((e.clientX - containerRect.left) / containerRect.width) * 100;
-                        updateSliderPosition(percentage);
-                        
-                        // Set manual control
-                        setManualControl();
-                    }
-                });
-            }
-            
-            function startDrag(e) {
-                e.preventDefault();
-                isDragging = true;
-                
-                // Set manual control
-                setManualControl();
-            }
-            
-            function drag(e) {
-                if (!isDragging) return;
-                
-                let clientX;
-                
-                // Handle both mouse and touch events
-                if (e.type === 'touchmove') {
-                    clientX = e.touches[0].clientX;
-                    e.preventDefault(); // Prevent scrolling when dragging
-                } else {
-                    clientX = e.clientX;
-                }
-                
-                const containerRect = container.getBoundingClientRect();
-                const percentage = ((clientX - containerRect.left) / containerRect.width) * 100;
-                updateSliderPosition(percentage);
-            }
-            
-            function endDrag() {
-                isDragging = false;
-            }
-            
-            function updateSliderPosition(percentage) {
-                // Constrain percentage between 0 and 100
-                const constrainedPercentage = Math.max(0, Math.min(percentage, 100));
-                
-                // Update positions
-                beforeImage.style.width = `${constrainedPercentage}%`;
-                handle.style.left = `${constrainedPercentage}%`;
-            }
-            
-            function setManualControl() {
-                isManuallyControlled = true;
-                
-                // Clear any existing timeout
-                if (manualControlTimeout) {
-                    clearTimeout(manualControlTimeout);
-                }
-                
-                // Set timeout to release manual control after a delay
-                manualControlTimeout = setTimeout(function() {
-                    isManuallyControlled = false;
-                }, 3000); // Return to scroll control after 3 seconds
-            }
-        });
-    </script>
-</body>
-</html>
