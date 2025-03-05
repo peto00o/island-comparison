@@ -1,265 +1,53 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Interactive comparison of Kulhudhuffushi Island from 2006 to 2023">
-    <meta property="og:title" content="Island Change Comparison">
-    <meta property="og:description" content="See how Kulhudhuffushi Island changed over time with this interactive slider">
-    <meta property="og:type" content="website">
-    <title>Island Change Comparison: 2006-2023</title>
-    <style>
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-            line-height: 1.6;
-        }
-        
-        .content {
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 20px;
-        }
-        
-        h1, h2 {
-            text-align: center;
-        }
-        
-        /* Spacer to allow scrolling */
-        .scroll-spacer {
-            height: 80vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.5rem;
-            color: #666;
-            text-align: center;
-            padding: 0 20px;
-        }
-        
-        /* Sticky container that stays in view while scrolling */
-        .sticky-container {
-            position: sticky;
-            top: 0;
-            height: 100vh;
-            width: 100%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            background-color: #f5f5f5;
-            z-index: 1;
-        }
-        
-        .comparison-container {
-            position: relative;
-            width: 90%;
-            max-width: 1000px;
-            overflow: hidden;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
-        }
-        
-        .comparison-container img {
-            width: 100%;
-            display: block;
-        }
-        
-        .image-before {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 0%; /* Start at 0% width */
-            height: 100%;
-            overflow: hidden;
-            transition: width 0.05s ease; /* Smooth transition when changed programmatically */
-        }
-        
-        .image-after {
-            display: block;
-        }
-        
-        .slider-handle {
-            position: absolute;
-            top: 0;
-            bottom: 0;
-            left: 0%; /* Start at 0% */
-            width: 4px;
-            background: white;
-            transform: translateX(-2px);
-            transition: left 0.05s ease; /* Smooth transition when changed programmatically */
-            cursor: grab;
-        }
-        
-        .slider-handle:active {
-            cursor: grabbing;
-        }
-        
-        .slider-handle::after {
-            content: '';
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            width: 40px;
-            height: 40px;
-            background: white;
-            border-radius: 50%;
-            border: 2px solid #333;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            box-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
-        }
-        
-        .slider-handle::before {
-            content: '↔';
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            font-size: 20px;
-            color: #333;
-            z-index: 10;
-        }
-        
-        .image-label {
-            position: absolute;
-            background-color: rgba(0, 0, 0, 0.7);
-            color: white;
-            padding: 5px 10px;
-            font-size: 14px;
-            pointer-events: none;
-            border-radius: 4px;
-        }
-        
-        .before-label {
-            top: 20px;
-            left: 20px;
-        }
-        
-        .after-label {
-            top: 20px;
-            right: 20px;
-        }
-        
-        .scroll-instruction {
-            position: absolute;
-            bottom: 30px;
-            left: 50%;
-            transform: translateX(-50%);
-            background-color: rgba(0, 0, 0, 0.7);
-            color: white;
-            padding: 10px 20px;
-            border-radius: 20px;
-            font-size: 16px;
-            text-align: center;
-            animation: pulse 2s infinite;
-        }
-        
-        @keyframes pulse {
-            0% { opacity: 0.7; }
-            50% { opacity: 1; }
-            100% { opacity: 0.7; }
-        }
-        
-        /* Error message styling */
-        .error-message {
-            display: none;
-            background-color: #f8d7da;
-            color: #721c24;
-            padding: 15px;
-            margin-top: 20px;
-            border-radius: 5px;
-            text-align: center;
-        }
-        
-        /* Loading indicator */
-        .loading {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            color: #333;
-            font-size: 18px;
-            background-color: rgba(255, 255, 255, 0.8);
-            padding: 10px 20px;
-            border-radius: 5px;
-            display: none;
-        }
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const comparisonContainer = document.getElementById("comparison-container");
+    const imageBefore = document.querySelector(".image-before");
+    const sliderHandle = document.getElementById("slider-handle");
 
-        /* Placeholder images for demo */
-        .placeholder-before {
-            background-color: #8bc34a;
-            height: 400px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-size: 24px;
-            font-weight: bold;
-        }
+    let isDragging = false;
 
-        .placeholder-after {
-            background-color: #03a9f4;
-            height: 400px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-size: 24px;
-            font-weight: bold;
-        }
-    </style>
-</head>
-<body>
-    <div class="scroll-spacer">
-        <p>↓ Scroll down to reveal the transformation of Kulhudhuffushi Island ↓</p>
-    </div>
-    
-    <div class="sticky-container">
-        <div class="comparison-container" id="comparison-container">
-            <!-- Using placeholders in case images are not available -->
-            <div class="placeholder-after">2023 IMAGE</div>
-            <div class="image-before">
-                <div class="placeholder-before">2006 IMAGE</div>
-            </div>
-            <div class="slider-handle" id="slider-handle"></div>
-            <div class="image-label before-label">BEFORE (2006)</div>
-            <div class="image-label after-label">AFTER (2023)</div>
-            <div class="scroll-instruction">Keep scrolling to see the change</div>
-            <div class="loading" id="loading">Loading images...</div>
-        </div>
-        <div class="error-message" id="error-message">
-            Unable to load images. Please check that the image files are in the correct location and try again.
-        </div>
-    </div>
-    
-    <div class="content">
-        <h1>Island Change Comparison: 2006-2023</h1>
-        <p>This interactive slider reveals the transformation of Kulhudhuffushi Island over time. As you scroll down the page, you'll see how the island has changed between 2006 and 2023. The comparison highlights changes in coastline, vegetation, and development.</p>
+    // Function to update the slider position
+    function updateSlider(positionX) {
+        const rect = comparisonContainer.getBoundingClientRect();
+        let offset = positionX - rect.left;
+        let percentage = (offset / rect.width) * 100;
         
-        <h2>How to Use This Viewer</h2>
-        <ul>
-            <li><strong>Scroll</strong> down the page to automatically reveal more of the 2006 image</li>
-            <li><strong>Drag</strong> the slider handle to manually compare specific areas</li>
-            <li><strong>Click</strong> anywhere on the image to jump the slider to that position</li>
-        </ul>
-        
-        <h2>About the Images</h2>
-        <p>These satellite images capture Kulhudhuffushi Island at two different points in time:</p>
-        <ul>
-            <li><strong>2006:</strong> Shows the island before recent development projects</li>
-            <li><strong>2023:</strong> Shows the current state of the island, including changes to shorelines, vegetation, and infrastructure</li>
-        </ul>
-        
-        <div style="height: 80vh; padding: 20px;">
-            <h2>Understanding the Changes</h2>
-            <p>The comparison reveals several notable changes to Kulhudhuffushi Island over the 17-year period:</p>
-            <ul>
-                <li>Coastal development and potential land reclamation</li>
-                <li>Changes in vegetation coverage</li>
-                <li>Infrastructure development</li>
-                <li>Potential effects of climate change on shorelines</li>
-            </ul>
-            <p>These changes reflect both human activity and natural processes affecting the island ecosystem.</p>
-        </div>
+        // Constrain within bounds
+        if (percentage < 0) percentage = 0;
+        if (percentage > 100) percentage = 100;
+
+        imageBefore.style.width = percentage + "%";
+        sliderHandle.style.left = percentage + "%";
+    }
+
+    // Mouse/touch movement event
+    function handleMove(event) {
+        if (!isDragging) return;
+        let clientX = event.touches ? event.touches[0].clientX : event.clientX;
+        updateSlider(clientX);
+    }
+
+    // Start dragging
+    sliderHandle.addEventListener("mousedown", () => isDragging = true);
+    sliderHandle.addEventListener("touchstart", () => isDragging = true);
+
+    // Stop dragging
+    document.addEventListener("mouseup", () => isDragging = false);
+    document.addEventListener("touchend", () => isDragging = false);
+
+    // Move slider on drag
+    document.addEventListener("mousemove", handleMove);
+    document.addEventListener("touchmove", handleMove);
+
+    // Click to move slider
+    comparisonContainer.addEventListener("click", function (event) {
+        updateSlider(event.clientX);
+    });
+
+    // Scroll effect
+    window.addEventListener("scroll", function () {
+        const scrollPercentage = (window.scrollY / (document.body.scrollHeight - window.innerHeight)) * 100;
+        updateSlider(comparisonContainer.offsetWidth * (scrollPercentage / 100) + comparisonContainer.getBoundingClientRect().left);
+    });
+});
+</script>
